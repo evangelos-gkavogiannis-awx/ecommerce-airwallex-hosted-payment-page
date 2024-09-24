@@ -22,15 +22,15 @@ Steps to run the app:
 
 
 ## Code explantion
-app/(store)/store.js ==> this is the state management. We use Zustand
+`app/(store)/store.js` ==> this is the state management. We use Zustand
 
-api/checkout/route.js ==> this the backend, where we call the Airwallex API to create the payment intent
+`api/checkout/route.js` ==> this the backend, where we call the Airwallex API to create the payment intent
 
-app/product/page.js ==> this is the page when you click to a product
+`app/product/page.js` ==> this is the page when you click to a product
 
-Header.js ==> code to handle the cart which is on the header
+`Header.js` ==> code to handle the cart which is on the header
 
-app/ProductCard.js ==> the card of each product
+`app/ProductCard.js` ==> the card of each product
 
 
 ## Deploy on Vercel
