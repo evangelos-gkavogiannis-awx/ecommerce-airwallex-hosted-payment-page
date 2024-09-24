@@ -1,6 +1,6 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-The ecommerce app (built in Next.js) integrates with Airwallex Hosted Payment Page
+It's a simple ecommerce app that integrates with Airwallex Hosted Payment Page
 
 ## Getting Started
 
