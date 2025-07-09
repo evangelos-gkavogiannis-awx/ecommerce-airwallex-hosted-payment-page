@@ -1,21 +1,21 @@
 const productsArray = [
     {
         id: "price_1LnUTFDM1jwCEz8OGoOSXiSM",
-        title: "Bananas",
+        title: "Motherboard",
         price: 4.99,
-        image:"/images/bananas.jpg"
+        image:"/images/motherboard.png"
     },
     {
         id: "price_1LnUTxDM1jwCEz8OAqHYTwKQ",
-        title: "Apples",
+        title: "Airpods",
         price: 9.99,
-        image:"/images/apples.jpg"
+        image:"/images/airpods.png"
     },
     {
         id: "price_1LnUUoDM1jwCEz8OvxIcJ7to",
-        title: "OrangeJuice",
+        title: "Iphone Case",
         price: 39.99,
-        image:"/images/orange-juice.jpg"
+        image:"/images/case.png"
     }
 ];
 

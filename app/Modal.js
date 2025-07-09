@@ -12,14 +12,18 @@ export default function Modal() {
     console.log(cartItems)
     const router = useRouter()
 
+    const [showCheckout, setShowCheckout] = useState(false);
+    const [checkoutData, setCheckoutData] = useState(null);
+    const [paymentIntentId, setPaymentIntentId] = useState(null);
+
     // Log the cart items to the browser console
     console.log("Cart Items in Modal:", cartItems);
     //Log the total cost to the browser console
     console.log("Total Cost:", getTotalCost()); // Call the function to get the total cost
 
 
-     //Initialize Airwallex
-     useEffect(() => {
+    //Initialize Airwallex
+    useEffect(() => {
         loadAirwallex({
             env: 'demo', // Setup which Airwallex env('demo' | 'prod') to integrate with
             /*
@@ -27,7 +31,7 @@ export default function Modal() {
             By setting origin: window.location.origin, you are dynamically setting the origin based on where your frontend is currently running. 
             This ensures that during development, the origin will be something like http://localhost:3000, and in production, 
             it will automatically adjust to your live domain (e.g., https://www.yourwebsite.com).
-            */ 
+            */
             origin: window.location.origin,
         });
     }, []);
@@ -42,9 +46,9 @@ export default function Modal() {
                 merchant_order_id: `order_${Date.now()}`,
                 return_url: 'http://www.yourwebsite.com/payment-result',
             };
-    
+
             console.log("Request body:", body); // Log the body to see what is being sent
-    
+
             const response = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: {
@@ -52,31 +56,120 @@ export default function Modal() {
                 },
                 body: JSON.stringify(body)
             });
-        
+
             if (!response.ok) {
                 throw new Error('Failed to create payment intent');
             }
-        
+
             const { client_secret, id } = await response.json();
-        
+
             // Redirect to Airwallex hosted payment page
             redirectToCheckout({
                 env: 'demo',
                 intent_id: id,
                 client_secret: client_secret,
                 currency: 'USD',
+                applePayRequestOptions: {
+                    countryCode: 'UK',
+                    buttonType: 'buy', // Indicate the type of button you want displayed on your payments form. Like 'buy'
+                    buttonColor: 'white-with-line', // Indicate the color of the button. Default value is 'black' 
+                },
                 methods: [
                     'card',         // Visa, Mastercard, etc.
-                    'googlepay',    // Google Pay
+                    'googlepay', 
+                    'applepay',   // Google Pay
                     'wechatpay',    // WeChat Pay
-                    'sepa_direct_debit'  // Example for Direct Debit
+                    'bacs_direct_debit'  // Example for Direct Debit
                 ]
             });
         } catch (error) {
             console.error('Error creating PaymentIntent:', error);
         }
     };
-    
+
+    async function checkout() {
+        try {
+            const payload = {
+                request_id: crypto.randomUUID(),
+                amount: getTotalCost(), // adapt as needed
+                currency: 'GBP',
+                merchant_order_id: `Merchant_Order_${crypto.randomUUID()}`,
+                return_url: 'https://your-return-url.com/checkout-result'
+            };
+
+            const response = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload) // payload includes amount, currency, merchant_order_id, etc.
+            });
+
+            if (!response.ok) throw new Error('Failed to create payment intent');
+
+            const data = await response.json();
+            setPaymentIntentId(data.id);
+            setCheckoutData({
+                ...payload,
+                ...data // you may want to merge any useful response fields
+            });
+            setShowCheckout(true);
+        } catch (error) {
+            console.error('Error creating PaymentIntent:', error);
+            alert('There was an error. Check console for details.');
+        }
+    }
+
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     const form = e.target;
+    //     const paymentData = {
+    //         payment_intent_id: paymentIntentId, // Already in your state
+    //         card_number: form.card_number.value,
+    //         expiry_month: form.expiry.value.split('/')[0].trim(),
+    //         expiry_year: '20' + form.expiry.value.split('/')[1].trim(),
+    //         cvc: form.cvc.value,
+    //     };
+
+    //     const response = await fetch('/api/confirm-payment', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify(paymentData),
+    //     });
+
+    //     const result = await response.json();
+    //     // Handle result: show user success, failure, close modal, etc.
+    //     if (response.ok) {
+    //         alert('Payment Success!');
+    //         // optionally close modal or redirect
+    //         setShowCheckout(false);
+    //         closeModal();
+    //     } else {
+    //         alert('Payment failed: ' + (result?.message || JSON.stringify(result)));
+    //     }
+    // };
+
+    // if (showCheckout && checkoutData) {
+    //     return (
+    //         <div className="fixed top-0 left-0 w-screen h-screen z-50 grid place-items-center bg-black/60">
+    //             <div className="bg-white p-8 rounded shadow-lg min-w-[350px]">
+    //                 <h2 className="text-xl mb-4">Checkout Form</h2>
+    //                 <div>Total amount: <b>£{getTotalCost().toFixed(2)}</b></div>
+    //                 <form
+    //                     onSubmit={handleSubmit}
+    //                     className="flex flex-col gap-3 mt-4"
+    //                 >
+    //                     <input required type="text" name="card_number" placeholder="Card number" className="border p-2" />
+    //                     <input required type="text" name="expiry" placeholder="MM/YY" className="border p-2" />
+    //                     <input required type="text" name="cvc" placeholder="CVC" className="border p-2" />
+    //                     <input required type="text" name="billing_address" placeholder="Billing Address" className="border p-2" />
+    //                     <input required type="text" name="billing_postcode" placeholder="Billing Postcode" className="border p-2" />
+    //                     <button type="submit" className="bg-blue-500 text-white p-2 rounded">Submit Payment</button>
+    //                 </form>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     return ReactDom.createPortal(
         <div className='fixed top-0 left-0 w-screen h-screen z-50'>
