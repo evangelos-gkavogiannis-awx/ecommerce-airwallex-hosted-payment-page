@@ -76,100 +76,65 @@ export default function Modal() {
                 },
                 methods: [
                     'card',         // Visa, Mastercard, etc.
-                    'googlepay', 
+                    'googlepay',
                     'applepay',   // Google Pay
                     'wechatpay',    // WeChat Pay
                     'bacs_direct_debit'  // Example for Direct Debit
                 ]
             });
+
+
+
+            /*
+            to save payment details for futute MITs
+            1. create a customer 
+            2. add the customer to the /v1/pa/payment_intents/create in the route.js
+            3. update and call the redirectToCheckout below
+            when the payment is completed the payment details are stored to the customer
+            */
+
+
+            // redirectToCheckout({
+            //     env: 'demo',
+            //     intent_id: id, // from your backend-created PaymentIntent
+            //     client_secret: "eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTIxNjM2NDUsImV4cCI6MTc1MjE2NzI0NSwidHlwZSI6ImNsaWVudC1zZWNyZXQiLCJwYWRjIjoiSEsiLCJhY2NvdW50X2lkIjoiNWVmYjYzMDAtNmFiNC00OGI5LWE5NWUtNzY5NmUxNzJlYjZmIiwiY3VzdG9tZXJfaWQiOiJjdXNfaGtkbW5oYmJ4aDkzOHY3MGRwbSJ9.geaSZmt8k3hnMzBcZOMddytscZDeBKtJxirDozUkdkI", // from your backend-created PaymentIntent
+            //     currency: 'USD',
+            //     country_code: 'US', // must be a valid 2-letter ISO code
+            //     customer_id: 'cus_hkdmnhbbxh938v70dpm', // required for saving payment method
+
+            //     mode: 'recurring', // enables saving of payment method
+            //     autoSaveCardForFuturePayments: true,
+
+            //     recurringOptions: {
+            //         next_triggered_by: 'merchant',
+            //         merchant_trigger_reason: 'scheduled',
+            //         three_ds_action: 'SKIP_3DS',
+            //         descriptor: 'Your Company MIT Setup',
+            //         currency: 'USD'
+            //     },
+
+            //     methods: [
+            //         'card',
+            //         'googlepay',
+            //         'applepay',
+            //         'wechatpay',
+            //         'bacs_direct_debit'
+            //     ],
+
+            //     applePayRequestOptions: {
+            //         countryCode: 'US', // Should match shopper's region for Apple Pay
+            //         buttonType: 'buy',
+            //         buttonColor: 'white-with-line'
+            //     },
+
+            //     successUrl: 'https://yourdomain.com/payment-success',
+            //     failUrl: 'https://yourdomain.com/payment-failure'
+            // });
+
         } catch (error) {
             console.error('Error creating PaymentIntent:', error);
         }
     };
-
-    async function checkout() {
-        try {
-            const payload = {
-                request_id: crypto.randomUUID(),
-                amount: getTotalCost(), // adapt as needed
-                currency: 'GBP',
-                merchant_order_id: `Merchant_Order_${crypto.randomUUID()}`,
-                return_url: 'https://your-return-url.com/checkout-result'
-            };
-
-            const response = await fetch('/api/checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload) // payload includes amount, currency, merchant_order_id, etc.
-            });
-
-            if (!response.ok) throw new Error('Failed to create payment intent');
-
-            const data = await response.json();
-            setPaymentIntentId(data.id);
-            setCheckoutData({
-                ...payload,
-                ...data // you may want to merge any useful response fields
-            });
-            setShowCheckout(true);
-        } catch (error) {
-            console.error('Error creating PaymentIntent:', error);
-            alert('There was an error. Check console for details.');
-        }
-    }
-
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     const form = e.target;
-    //     const paymentData = {
-    //         payment_intent_id: paymentIntentId, // Already in your state
-    //         card_number: form.card_number.value,
-    //         expiry_month: form.expiry.value.split('/')[0].trim(),
-    //         expiry_year: '20' + form.expiry.value.split('/')[1].trim(),
-    //         cvc: form.cvc.value,
-    //     };
-
-    //     const response = await fetch('/api/confirm-payment', {
-    //         method: 'POST',
-    //         headers: { 'Content-Type': 'application/json' },
-    //         body: JSON.stringify(paymentData),
-    //     });
-
-    //     const result = await response.json();
-    //     // Handle result: show user success, failure, close modal, etc.
-    //     if (response.ok) {
-    //         alert('Payment Success!');
-    //         // optionally close modal or redirect
-    //         setShowCheckout(false);
-    //         closeModal();
-    //     } else {
-    //         alert('Payment failed: ' + (result?.message || JSON.stringify(result)));
-    //     }
-    // };
-
-    // if (showCheckout && checkoutData) {
-    //     return (
-    //         <div className="fixed top-0 left-0 w-screen h-screen z-50 grid place-items-center bg-black/60">
-    //             <div className="bg-white p-8 rounded shadow-lg min-w-[350px]">
-    //                 <h2 className="text-xl mb-4">Checkout Form</h2>
-    //                 <div>Total amount: <b>£{getTotalCost().toFixed(2)}</b></div>
-    //                 <form
-    //                     onSubmit={handleSubmit}
-    //                     className="flex flex-col gap-3 mt-4"
-    //                 >
-    //                     <input required type="text" name="card_number" placeholder="Card number" className="border p-2" />
-    //                     <input required type="text" name="expiry" placeholder="MM/YY" className="border p-2" />
-    //                     <input required type="text" name="cvc" placeholder="CVC" className="border p-2" />
-    //                     <input required type="text" name="billing_address" placeholder="Billing Address" className="border p-2" />
-    //                     <input required type="text" name="billing_postcode" placeholder="Billing Postcode" className="border p-2" />
-    //                     <button type="submit" className="bg-blue-500 text-white p-2 rounded">Submit Payment</button>
-    //                 </form>
-    //             </div>
-    //         </div>
-    //     );
-    // }
 
     return ReactDom.createPortal(
         <div className='fixed top-0 left-0 w-screen h-screen z-50'>

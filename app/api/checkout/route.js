@@ -86,6 +86,7 @@ export async function POST(request) {
         'Authorization': `Bearer ${process.env.AIRWALLEX_BEARER_TOKEN}`
       },
       body: JSON.stringify({
+        customer_id: "cus_hkdmnhbbxh938v70dpm",
         request_id: `${Date.now()}`,
         amount: body.amount,
         currency: body.currency,
